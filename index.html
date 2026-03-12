@@ -320,10 +320,10 @@ function generateSummary() {
   l.push(`  Offering water: ${data.offeringWater==="Yes"?"✅":"❌"}`);
   l.push(`  Extra services: ${data.extraServices==="Yes"?"✅":"❌"}`);
   l.push(`  Receipt before payment: ${data.receipt==="Yes"?"✅":"❌"}`);
-  if(data.serviceIssueDetails){l.push(`  📝 ${data.serviceIssueDetails}`);}
+  if(data.serviceIssueDetails){l.push(`   ${data.serviceIssueDetails}`);}
   if(data.staffMissing==="Yes"){l.push("");l.push(` *STAFF MISSING*: ${data.missingName||"?"} (${data.missingMins||"?"} mins)`);}
   if(data.goodService||data.poorService){l.push("");if(data.goodService)l.push(` Good service: ${data.goodService}`);if(data.poorService)l.push(` Poor service: ${data.poorService}`);}
-  if(data.observations){l.push("");l.push(`📝 ${data.observations}`);}
+  if(data.observations){l.push("");l.push(` ${data.observations}`);}
   l.push("");l.push("━━━━━━━━━━━━━━━━━━━━");
   return l.join("\n");
 }
