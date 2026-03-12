@@ -338,7 +338,7 @@ function generateSummary() {
   let waterLine = `  Offering water: ${data.offeringWater==="Yes"?"✅":"❌"}`;
   if (data.offeringWater==="No" && data.offeringWaterNote) waterLine += ` — ${data.offeringWaterNote}`;
   l.push(waterLine);
-  let extraLine = `  Extra services: ${data.extraServices==="Yes"?"✅":"❌"}`;
+  let extraLine = `  Extra services offered: ${data.extraServices==="Yes"?"✅":"❌"}`;
   if (data.extraServices==="No" && data.extraServicesNote) extraLine += ` — ${data.extraServicesNote}`;
   l.push(extraLine);
   let rcptLine = `  Receipt before payment: ${data.receipt==="Yes"?"✅":"❌"}`;
