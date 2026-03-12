@@ -153,7 +153,7 @@ const SECTIONS = [
     { id:"salon", label:"Salon", type:"select", options:SALONS, required:true },
     { id:"inspDate", label:"Date", type:"date", required:true },
     { id:"inspTime", label:"Time", type:"time", required:true },
-    { id:"staffOnDuty", label:"Staff on Duty", type:"text", placeholder:"Enter staff names here", required:true },
+    { id:"staffOnDuty", label:"Staff on Duty", type:"text", placeholder:"Enter names of staff on shift.", required:true },
   ]},
   { title: "👋 First Impressions", fields: [
     { id:"smile", label:"1. Did staff acknowledge with a smile?", type:"radio", options:["Yes","No"], required:true },
@@ -298,10 +298,10 @@ function generateSummary() {
   l.push("━━━━━━━━━━━━━━━━━━━━");
   l.push("📋 *SALON INSPECTION*");
   l.push("━━━━━━━━━━━━━━━━━━━━");
-  l.push(`🔖 *${getInspectionCode()}*`);
+  l.push(`ID: *${getInspectionCode()}*`);
   l.push(`📍 *${data.salon}*`);
   l.push(`📅 ${date}  🕐 ${time}`);
-  l.push(`👥 Staff: ${data.staffOnDuty}`);
+  l.push(`👥 Staff on duty: ${data.staffOnDuty}`);
   l.push("");
   l.push("*FIRST IMPRESSIONS*");
   l.push(`  Smile: ${data.smile==="Yes"?"✅":"❌ "+(data.smileNames||"")}`);
@@ -396,7 +396,16 @@ function renderResult() {
     <div class="summary-box" id="summaryBox">${summary.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
     <button class="btn-wa" onclick="sendWA()">📲 Send via WhatsApp</button>
     <button class="btn-copy" id="copyBtn" onclick="copyText()">📋 Copy to Clipboard</button>
-    <button class="btn-reset" onclick="resetForm()">← New Inspection</button>`;
+    <div class="nav" style="position:relative;margin-top:16px;">
+      <button class="btn-back" onclick="goBack()">← Back</button>
+      <button class="btn-next" onclick="resetForm()" style="background:linear-gradient(135deg,#64748b,#475569);box-shadow:0 4px 12px rgba(71,85,105,0.3);">New Inspection</button>
+    </div>`;
+}
+
+function goBack() {
+  isSubmitted = false;
+  currentSection = SECTIONS.length - 1;
+  render();
 }
 
 function render() {
