@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Salon Check">
+<title>Salon Inspection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    background: linear-gradient(145deg, #f0fdf4 0%, #f8fafc 50%, #eff6ff 100%);
+    min-height: 100vh; min-height: 100dvh;
+    color: #1a1a1a;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .container { max-width: 500px; margin: 0 auto; padding: 16px; padding-bottom: 110px; }
+
+  /* Header */
+  .header { text-align: center; padding: 16px 0 8px; }
+  .header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .header .step { font-size: 13px; color: #888; }
+
+  /* Progress */
+  .progress-track { height: 4px; background: #e5e7eb; border-radius: 4px; margin: 8px 0 24px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a); border-radius: 4px; transition: width 0.4s ease; }
+
+  /* Card */
+  .card {
+    background: #fff; border-radius: 20px; padding: 24px 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.04);
+  }
+  .card h2 {
+    font-size: 18px; font-weight: 700; margin-bottom: 20px;
+    padding-bottom: 12px; border-bottom: 2px solid #f0f0f0;
+  }
+
+  /* Fields */
+  .field { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #f5f5f5; }
+  .field:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .field label {
+    display: block; font-size: 14px; font-weight: 600; color: #333;
+    margin-bottom: 10px; line-height: 1.4;
+  }
+  .field label.error { color: #dc2626; }
+  .field label .req { color: #dc2626; margin-left: 3px; }
+
+  /* Radio buttons */
+  .radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .radio-btn {
+    padding: 10px 18px; border-radius: 10px; border: 2px solid #ddd;
+    background: #fff; color: #666; font-weight: 500; font-size: 15px;
+    cursor: pointer; transition: all 0.15s ease; font-family: inherit;
+    text-align: center; -webkit-user-select: none; user-select: none;
+  }
+  .radio-group.two-opt .radio-btn { flex: 1; }
+  .radio-btn.selected { border-color: #1a6b4a; color: #1a1a1a; font-weight: 700; }
+  .radio-btn.selected.positive { background: #dcfce7; }
+  .radio-btn.selected.neutral { background: #fef3c7; }
+  .radio-btn.selected.negative { background: #fee2e2; }
+  .radio-btn:active { transform: scale(0.97); }
+
+  /* Inputs */
+  input[type="text"], select, textarea {
+    width: 100%; padding: 12px 14px; border-radius: 10px; border: 2px solid #ddd;
+    font-size: 15px; font-family: inherit; background: #fff; color: #1a1a1a;
+    appearance: none; -webkit-appearance: none;
+  }
+  input[type="text"]:focus, select:focus, textarea:focus { outline: none; border-color: #1a6b4a; }
+  input.error, select.error { border-color: #dc2626; }
+  textarea { resize: vertical; min-height: 80px; }
+  select { color: #999; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center; padding-right: 36px; }
+  select.has-value { color: #1a1a1a; }
+
+  /* Navigation */
+  .nav { display: flex; gap: 10px; margin-top: 20px; position: sticky; bottom: 16px; z-index: 10; }
+  .btn-back {
+    flex: 0 0 auto; padding: 16px 24px; border-radius: 14px; border: 2px solid #ddd;
+    background: #fff; font-size: 16px; font-weight: 600; cursor: pointer;
+    font-family: inherit; color: #555;
+  }
+  .btn-next {
+    flex: 1; padding: 16px; border-radius: 14px; border: none;
+    background: linear-gradient(135deg, #1a6b4a, #15803d);
+    color: #fff; font-size: 17px; font-weight: 700; cursor: pointer;
+    font-family: inherit; box-shadow: 0 4px 12px rgba(22,163,74,0.3);
+  }
+  .btn-next.submit { background: linear-gradient(135deg, #22c55e, #16a34a); }
+  .btn-next:active, .btn-back:active { transform: scale(0.98); }
+
+  /* Result page */
+  .result-header { text-align: center; padding: 24px 0 16px; }
+  .result-header .icon { font-size: 48px; margin-bottom: 8px; }
+  .result-header h2 { font-size: 22px; font-weight: 700; }
+  .result-header p { color: #666; font-size: 14px; margin-top: 6px; }
+
+  .summary-box {
+    background: #1a1a1a; border-radius: 16px; padding: 20px; margin: 12px 0;
+    font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.6;
+    color: #e5e5e5; white-space: pre-wrap; word-break: break-word;
+    max-height: 400px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+
+  .btn-wa {
+    width: 100%; padding: 16px; border-radius: 14px; border: none;
+    background: #25D366; color: #fff; font-size: 17px; font-weight: 700;
+    cursor: pointer; font-family: inherit; margin-bottom: 10px;
+  }
+  .btn-copy {
+    width: 100%; padding: 16px; border-radius: 14px; border: 2px solid #ddd;
+    background: #fff; color: #333; font-size: 17px; font-weight: 700;
+    cursor: pointer; font-family: inherit; margin-bottom: 10px;
+    transition: all 0.2s ease;
+  }
+  .btn-copy.copied { background: #dcfce7; border-color: #86efac; color: #166534; }
+  .btn-reset {
+    width: 100%; padding: 14px; border-radius: 14px; border: none;
+    background: transparent; color: #888; font-size: 15px; font-weight: 500;
+    cursor: pointer; font-family: inherit;
+  }
+
+  /* Hide on result */
+  .hidden { display: none !important; }
+
+  /* Smooth transitions */
+  .card { animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body>
+
+<div class="container" id="app"></div>
+
+<script>
+// ─── CONFIG: Edit salon names here ───
+const SALONS = ["Main Branch", "Branch 2", "Branch 3"];
+
+// ─── FORM STRUCTURE ───
+const SECTIONS = [
+  { title: "📋 Basic Info", fields: [
+    { id:"salon", label:"Salon", type:"select", options:SALONS, required:true },
+    { id:"staffOnDuty", label:"Staff on Duty", type:"text", placeholder:"e.g. Ahmed, Sara, Priya", required:true },
+  ]},
+  { title: "👋 First Impressions", fields: [
+    { id:"smile", label:"1. Did staff acknowledge with a smile?", type:"radio", options:["Yes","No"], required:true },
+    { id:"smileNames", label:"Names (no smile)", type:"text", placeholder:"Optional", condition: d => d.smile==="No" },
+    { id:"music", label:"2. Was the music on?", type:"radio", options:["Yes","No"], required:true },
+    { id:"smell", label:"3. How was the smell?", type:"radio", options:["Good","Fair","Bad"], required:true },
+    { id:"fountain", label:"4. Was water fountain on?", type:"radio", options:["Yes","No"], required:true },
+    { id:"ac", label:"5. Was AC temperature good?", type:"radio", options:["Yes","No"], required:true },
+    { id:"uniform", label:"6. Uniform and grooming?", type:"radio", options:["Good","Fair","Bad"], required:true },
+    { id:"uniformNames", label:"Names (poor grooming)", type:"text", placeholder:"Optional", condition: d => d.uniform==="Fair"||d.uniform==="Bad" },
+  ]},
+  { title: "🧹 Cleanliness", fields: [
+    { id:"frontArea", label:"A. Front Area", type:"radio", options:["Clean","Unclean"], required:true },
+    { id:"backArea", label:"B. Back Area", type:"radio", options:["Clean","Unclean"], required:true },
+    { id:"store", label:"C. Store", type:"radio", options:["Clean","Unclean"], required:true },
+    { id:"fridge", label:"D. Fridge", type:"radio", options:["Clean","Unclean"], required:true },
+    { id:"washBasin", label:"E. Wash Basin", type:"radio", options:["Clean","Unclean"], required:true },
+    { id:"trolley", label:"F. Trolley", type:"radio", options:["Clean","Unclean"], required:true },
+  ]},
+  { title: "💼 Service Standards", fields: [
+    { id:"personalChats", label:"8. Staff having personal chats with customer present?", type:"radio", options:["Yes","No"], required:true },
+    { id:"offeringWater", label:"9. Staff offering water before service?", type:"radio", options:["Yes","No"], required:true },
+    { id:"extraServices", label:"10. Staff informing about extra services?", type:"radio", options:["Yes","No"], required:true },
+    { id:"receipt", label:"11. Staff making receipt before charging?", type:"radio", options:["Yes","No"], required:true },
+  ]},
+  { title: "⚠️ Issues & Notes", fields: [
+    { id:"staffMissing", label:"12. Any staff missing without reason?", type:"radio", options:["Yes","No"], required:true },
+    { id:"missingName", label:"Missing staff name", type:"text", placeholder:"Name", condition: d => d.staffMissing==="Yes" },
+    { id:"missingMins", label:"Minutes missing", type:"text", placeholder:"e.g. 15", condition: d => d.staffMissing==="Yes" },
+    { id:"goodService", label:"13. Who showed good customer service?", type:"text", placeholder:"Name(s)" },
+    { id:"poorService", label:"14. Who showed poor customer service?", type:"text", placeholder:"Optional" },
+    { id:"observations", label:"15. Other observations", type:"textarea", placeholder:"Any other notes..." },
+  ]},
+];
+
+let data = {};
+let currentSection = 0;
+let errors = {};
+const app = document.getElementById('app');
+
+function set(id, val) {
+  data[id] = val;
+  delete errors[id];
+  render();
+}
+
+function classifyOption(opt) {
+  if (["Yes","Good","Clean"].includes(opt)) return "positive";
+  if (["Fair"].includes(opt)) return "neutral";
+  return "negative";
+}
+
+// Flip logic: for questions where "No" is the GOOD answer
+const FLIP_IDS = new Set(["personalChats"]);
+function classifyForField(fieldId, opt) {
+  const cls = classifyOption(opt);
+  if (FLIP_IDS.has(fieldId)) {
+    if (cls === "positive") return "negative";
+    if (cls === "negative") return "positive";
+  }
+  return cls;
+}
+
+function validateSection(idx) {
+  const section = SECTIONS[idx];
+  errors = {};
+  section.fields.forEach(f => {
+    if (f.condition && !f.condition(data)) return;
+    if (f.required && !data[f.id]) errors[f.id] = true;
+  });
+  return Object.keys(errors).length === 0;
+}
+
+function generateSummary() {
+  const now = new Date();
+  const date = now.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+  const time = now.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+  const clean = ["frontArea","backArea","store","fridge","washBasin","trolley"];
+  const cleanCount = clean.filter(k => data[k]==="Clean").length;
+  const areaLabels = {frontArea:"Front",backArea:"Back",store:"Store",fridge:"Fridge",washBasin:"Basin",trolley:"Trolley"};
+  const unclean = clean.filter(k => data[k]==="Unclean").map(k => areaLabels[k]);
+  const serviceGood = ["offeringWater","extraServices","receipt"].filter(k => data[k]==="Yes").length;
+  const chatIssue = data.personalChats==="Yes";
+
+  let l = [];
+  l.push("━━━━━━━━━━━━━━━━━━━━");
+  l.push("📋 *SALON INSPECTION*");
+  l.push("━━━━━━━━━━━━━━━━━━━━");
+  l.push(`📍 *${data.salon}*`);
+  l.push(`📅 ${date}  🕐 ${time}`);
+  l.push(`👥 Staff: ${data.staffOnDuty}`);
+  l.push("");
+  l.push("*FIRST IMPRESSIONS*");
+  l.push(`  Smile: ${data.smile==="Yes"?"✅":"❌ "+(data.smileNames||"")}`);
+  l.push(`  Music: ${data.music==="Yes"?"✅":"❌"}`);
+  l.push(`  Smell: ${data.smell==="Good"?"✅ Good":data.smell==="Fair"?"⚠️ Fair":"❌ Bad"}`);
+  l.push(`  Fountain: ${data.fountain==="Yes"?"✅":"❌"}`);
+  l.push(`  AC: ${data.ac==="Yes"?"✅":"❌"}`);
+  const uniStr = data.uniform==="Good"?"✅ Good":data.uniform==="Fair"?"⚠️ Fair":"❌ Bad";
+  l.push(`  Uniform: ${uniStr}${data.uniformNames?" ("+data.uniformNames+")":""}`);
+  l.push("");
+  l.push(`*CLEANLINESS* ${cleanCount}/6`);
+  l.push(unclean.length===0?"  All areas clean ✅":`  ❌ Unclean: ${unclean.join(", ")}`);
+  l.push("");
+  l.push(`*SERVICE STANDARDS* ${serviceGood}/3 good${chatIssue?" ⚠️":""}`);
+  l.push(`  Personal chats: ${chatIssue?"❌ Yes (issue)":"✅ No"}`);
+  l.push(`  Offering water: ${data.offeringWater==="Yes"?"✅":"❌"}`);
+  l.push(`  Extra services: ${data.extraServices==="Yes"?"✅":"❌"}`);
+  l.push(`  Receipt: ${data.receipt==="Yes"?"✅":"❌"}`);
+  if(data.staffMissing==="Yes"){l.push("");l.push(`⚠️ *STAFF MISSING*: ${data.missingName||"?"} (${data.missingMins||"?"} mins)`);}
+  if(data.goodService||data.poorService){l.push("");if(data.goodService)l.push(`⭐ Good service: ${data.goodService}`);if(data.poorService)l.push(`⛔ Poor service: ${data.poorService}`);}
+  if(data.observations){l.push("");l.push(`📝 ${data.observations}`);}
+  l.push("");l.push("━━━━━━━━━━━━━━━━━━━━");
+  return l.join("\n");
+}
+
+function renderForm() {
+  const section = SECTIONS[currentSection];
+  const isLast = currentSection === SECTIONS.length - 1;
+  const progress = ((currentSection+1)/SECTIONS.length)*100;
+
+  let html = `
+    <div class="header">
+      <h1>Salon Inspection</h1>
+      <div class="step">Step ${currentSection+1} of ${SECTIONS.length}</div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div>
+    <div class="card">
+      <h2>${section.title}</h2>`;
+
+  section.fields.forEach(f => {
+    if (f.condition && !f.condition(data)) return;
+    const hasErr = errors[f.id];
+    html += `<div class="field">`;
+    html += `<label class="${hasErr?'error':''}">${f.label}${f.required?'<span class="req">*</span>':''}</label>`;
+
+    if (f.type === "radio") {
+      const twoOpt = f.options.length <= 2 ? ' two-opt' : '';
+      html += `<div class="radio-group${twoOpt}">`;
+      f.options.forEach(opt => {
+        const sel = data[f.id] === opt;
+        const cls = sel ? classifyForField(f.id, opt) : '';
+        html += `<button type="button" class="radio-btn${sel?' selected':''}${sel?' '+cls:''}" onclick="set('${f.id}','${opt}')">${opt}</button>`;
+      });
+      html += `</div>`;
+    } else if (f.type === "select") {
+      const hasVal = data[f.id] ? ' has-value' : '';
+      html += `<select class="${hasErr?'error':''}${hasVal}" onchange="set('${f.id}',this.value)">`;
+      html += `<option value="">Select salon...</option>`;
+      f.options.forEach(o => { html += `<option value="${o}"${data[f.id]===o?' selected':''}>${o}</option>`; });
+      html += `</select>`;
+    } else if (f.type === "text") {
+      html += `<input type="text" class="${hasErr?'error':''}" value="${data[f.id]||''}" placeholder="${f.placeholder||''}" oninput="set('${f.id}',this.value)">`;
+    } else if (f.type === "textarea") {
+      html += `<textarea placeholder="${f.placeholder||''}" oninput="set('${f.id}',this.value)">${data[f.id]||''}</textarea>`;
+    }
+    html += `</div>`;
+  });
+
+  html += `</div><div class="nav">`;
+  if (currentSection > 0) html += `<button class="btn-back" onclick="prev()">←</button>`;
+  html += `<button class="btn-next${isLast?' submit':''}" onclick="${isLast?'submit':'next'}()">${isLast?'✓ Submit Inspection':'Next →'}</button>`;
+  html += `</div>`;
+
+  app.innerHTML = html;
+}
+
+function renderResult() {
+  const summary = generateSummary();
+  app.innerHTML = `
+    <div class="result-header">
+      <div class="icon">✅</div>
+      <h2>Inspection Complete</h2>
+      <p>Send the report via WhatsApp</p>
+    </div>
+    <div class="summary-box" id="summaryBox">${summary.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+    <button class="btn-wa" onclick="sendWA()">📲 Send via WhatsApp</button>
+    <button class="btn-copy" id="copyBtn" onclick="copyText()">📋 Copy to Clipboard</button>
+    <button class="btn-reset" onclick="resetForm()">← New Inspection</button>`;
+}
+
+function render() {
+  if (app.dataset.submitted === 'true') renderResult();
+  else renderForm();
+}
+
+function next() {
+  if (validateSection(currentSection)) {
+    currentSection = Math.min(currentSection+1, SECTIONS.length-1);
+    window.scrollTo({top:0,behavior:'smooth'});
+    render();
+  } else { render(); }
+}
+
+function prev() {
+  currentSection = Math.max(currentSection-1, 0);
+  window.scrollTo({top:0,behavior:'smooth'});
+  render();
+}
+
+function submit() {
+  if (validateSection(currentSection)) {
+    app.dataset.submitted = 'true';
+    window.scrollTo({top:0,behavior:'smooth'});
+    render();
+  } else { render(); }
+}
+
+function sendWA() {
+  const text = generateSummary();
+  window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank');
+}
+
+function copyText() {
+  const text = generateSummary();
+  const btn = document.getElementById('copyBtn');
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = '✅ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '📋 Copy to Clipboard'; btn.classList.remove('copied'); }, 2500);
+    });
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    btn.textContent = '✅ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '📋 Copy to Clipboard'; btn.classList.remove('copied'); }, 2500);
+  }
+}
+
+function resetForm() {
+  data = {}; currentSection = 0; errors = {};
+  app.dataset.submitted = '';
+  window.scrollTo({top:0,behavior:'smooth'});
+  render();
+}
+
+// Initial render
+render();
+</script>
+</body>
+</html>
