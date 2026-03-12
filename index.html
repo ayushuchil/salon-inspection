@@ -65,12 +65,12 @@
   .radio-btn:active { transform: scale(0.97); }
 
   /* Inputs */
-  input[type="text"], select, textarea {
+  input[type="text"], input[type="date"], input[type="time"], select, textarea {
     width: 100%; padding: 12px 14px; border-radius: 10px; border: 2px solid #ddd;
     font-size: 15px; font-family: inherit; background: #fff; color: #1a1a1a;
     appearance: none; -webkit-appearance: none;
   }
-  input[type="text"]:focus, select:focus, textarea:focus { outline: none; border-color: #1a6b4a; }
+  input[type="text"]:focus, input[type="date"]:focus, input[type="time"]:focus, select:focus, textarea:focus { outline: none; border-color: #1a6b4a; }
   input.error, select.error { border-color: #dc2626; }
   textarea { resize: vertical; min-height: 80px; }
   select { color: #999; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center; padding-right: 36px; }
@@ -137,7 +137,15 @@
 
 <script>
 // ─── CONFIG: Edit salon names here ───
-const SALONS = ["LuLu", "Bahrain Mall", "In and Out", "Hidd"];
+const SALONS = ["LuLu", "Hidd", "Bahrain Mall", "In & Out"];
+
+// ─── Inspection code map ───
+const CODE_MAP = {
+  "LuLu": "lulu",
+  "Hidd": "hidd",
+  "Bahrain Mall": "bahrainmall",
+  "In & Out": "inandout"
+};
 
 // ─── FORM STRUCTURE ───
 const SECTIONS = [
@@ -184,9 +192,9 @@ const SECTIONS = [
 let data = {};
 let currentSection = 0;
 let errors = {};
+let isSubmitted = false;
 const app = document.getElementById('app');
 
-// Default date/time to now
 function initDefaults() {
   const now = new Date();
   data.inspDate = now.toISOString().slice(0,10);
@@ -194,10 +202,49 @@ function initDefaults() {
 }
 initDefaults();
 
-function set(id, val) {
+// ─── QUIET SET: text/date/time inputs store data WITHOUT re-rendering ───
+function setQuiet(id, val) {
   data[id] = val;
   delete errors[id];
-  render();
+  // Just clear error styling if present, no DOM rebuild
+  const label = document.querySelector(`[data-field="${id}"] label`);
+  if (label) label.classList.remove('error');
+}
+
+// ─── RADIO/SELECT SET: needs re-render only if conditional fields change ───
+function set(id, val) {
+  const oldVal = data[id];
+  data[id] = val;
+  delete errors[id];
+
+  // Check if any conditional field visibility would change
+  const section = SECTIONS[currentSection];
+  const needsRebuild = section.fields.some(f => {
+    if (!f.condition) return false;
+    const wasBefore = f.condition({...data, [id]: oldVal});
+    const isNow = f.condition(data);
+    return wasBefore !== isNow;
+  });
+
+  if (needsRebuild) {
+    renderForm();
+  } else {
+    // Just update button styles in-place
+    updateRadioButtons(id, val);
+  }
+}
+
+function updateRadioButtons(fieldId, selectedVal) {
+  const container = document.querySelector(`[data-field="${fieldId}"] .radio-group`);
+  if (!container) return;
+  container.querySelectorAll('.radio-btn').forEach(btn => {
+    const opt = btn.dataset.opt;
+    const sel = opt === selectedVal;
+    btn.className = 'radio-btn' + (sel ? ' selected ' + classifyForField(fieldId, opt) : '');
+  });
+  // Clear error on label
+  const label = document.querySelector(`[data-field="${fieldId}"] label`);
+  if (label) label.classList.remove('error');
 }
 
 function classifyOption(opt) {
@@ -206,7 +253,6 @@ function classifyOption(opt) {
   return "negative";
 }
 
-// Flip logic: for questions where "No" is the GOOD answer
 const FLIP_IDS = new Set(["personalChats"]);
 function classifyForField(fieldId, opt) {
   const cls = classifyOption(opt);
@@ -227,6 +273,15 @@ function validateSection(idx) {
   return Object.keys(errors).length === 0;
 }
 
+function getInspectionCode() {
+  const code = CODE_MAP[data.salon] || data.salon.toLowerCase().replace(/[^a-z0-9]/g,'');
+  const d = data.inspDate ? new Date(data.inspDate) : new Date();
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yy = String(d.getFullYear()).slice(-2);
+  return code + dd + mm + yy;
+}
+
 function generateSummary() {
   const d = data.inspDate ? new Date(data.inspDate) : new Date();
   const date = d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
@@ -242,6 +297,7 @@ function generateSummary() {
   l.push("━━━━━━━━━━━━━━━━━━━━");
   l.push("📋 *SALON INSPECTION*");
   l.push("━━━━━━━━━━━━━━━━━━━━");
+  l.push(`🔖 *${getInspectionCode()}*`);
   l.push(`📍 *${data.salon}*`);
   l.push(`📅 ${date}  🕐 ${time}`);
   l.push(`👥 Staff: ${data.staffOnDuty}`);
@@ -270,6 +326,8 @@ function generateSummary() {
   return l.join("\n");
 }
 
+function esc(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
 function renderForm() {
   const section = SECTIONS[currentSection];
   const isLast = currentSection === SECTIONS.length - 1;
@@ -287,7 +345,7 @@ function renderForm() {
   section.fields.forEach(f => {
     if (f.condition && !f.condition(data)) return;
     const hasErr = errors[f.id];
-    html += `<div class="field">`;
+    html += `<div class="field" data-field="${f.id}">`;
     html += `<label class="${hasErr?'error':''}">${f.label}${f.required?'<span class="req">*</span>':''}</label>`;
 
     if (f.type === "radio") {
@@ -296,30 +354,30 @@ function renderForm() {
       f.options.forEach(opt => {
         const sel = data[f.id] === opt;
         const cls = sel ? classifyForField(f.id, opt) : '';
-        html += `<button type="button" class="radio-btn${sel?' selected':''}${sel?' '+cls:''}" onclick="set('${f.id}','${opt}')">${opt}</button>`;
+        html += `<button type="button" class="radio-btn${sel?' selected':''}${sel?' '+cls:''}" data-opt="${esc(opt)}" onclick="set('${f.id}','${esc(opt)}')">${esc(opt)}</button>`;
       });
       html += `</div>`;
     } else if (f.type === "select") {
       const hasVal = data[f.id] ? ' has-value' : '';
-      html += `<select class="${hasErr?'error':''}${hasVal}" onchange="set('${f.id}',this.value)">`;
+      html += `<select class="${hasErr?'error':''}${hasVal}" onchange="setQuiet('${f.id}',this.value);this.className=(this.value?'has-value':'')">`;
       html += `<option value="">Select salon...</option>`;
-      f.options.forEach(o => { html += `<option value="${o}"${data[f.id]===o?' selected':''}>${o}</option>`; });
+      f.options.forEach(o => { html += `<option value="${esc(o)}"${data[f.id]===o?' selected':''}>${esc(o)}</option>`; });
       html += `</select>`;
     } else if (f.type === "text") {
-      html += `<input type="text" class="${hasErr?'error':''}" value="${data[f.id]||''}" placeholder="${f.placeholder||''}" oninput="set('${f.id}',this.value)">`;
+      html += `<input type="text" class="${hasErr?'error':''}" value="${esc(data[f.id])}" placeholder="${f.placeholder||''}" oninput="setQuiet('${f.id}',this.value)">`;
     } else if (f.type === "date") {
-      html += `<input type="date" class="${hasErr?'error':''}" value="${data[f.id]||''}" onchange="set('${f.id}',this.value)">`;
+      html += `<input type="date" class="${hasErr?'error':''}" value="${data[f.id]||''}" onchange="setQuiet('${f.id}',this.value)">`;
     } else if (f.type === "time") {
-      html += `<input type="time" class="${hasErr?'error':''}" value="${data[f.id]||''}" onchange="set('${f.id}',this.value)">`;
+      html += `<input type="time" class="${hasErr?'error':''}" value="${data[f.id]||''}" onchange="setQuiet('${f.id}',this.value)">`;
     } else if (f.type === "textarea") {
-      html += `<textarea placeholder="${f.placeholder||''}" oninput="set('${f.id}',this.value)">${data[f.id]||''}</textarea>`;
+      html += `<textarea placeholder="${f.placeholder||''}" oninput="setQuiet('${f.id}',this.value)">${esc(data[f.id])}</textarea>`;
     }
     html += `</div>`;
   });
 
   html += `</div><div class="nav">`;
   if (currentSection > 0) html += `<button class="btn-back" onclick="prev()">←</button>`;
-  html += `<button class="btn-next${isLast?' submit':''}" onclick="${isLast?'submit':'next'}()">${isLast?'✓ Submit Inspection':'Next →'}</button>`;
+  html += `<button class="btn-next${isLast?' submit':''}" onclick="${isLast?'doSubmit':'next'}()">${isLast?'✓ Submit Inspection':'Next →'}</button>`;
   html += `</div>`;
 
   app.innerHTML = html;
@@ -340,7 +398,7 @@ function renderResult() {
 }
 
 function render() {
-  if (app.dataset.submitted === 'true') renderResult();
+  if (isSubmitted) renderResult();
   else renderForm();
 }
 
@@ -358,9 +416,9 @@ function prev() {
   render();
 }
 
-function submit() {
+function doSubmit() {
   if (validateSection(currentSection)) {
-    app.dataset.submitted = 'true';
+    isSubmitted = true;
     window.scrollTo({top:0,behavior:'smooth'});
     render();
   } else { render(); }
@@ -391,14 +449,12 @@ function copyText() {
 }
 
 function resetForm() {
-  data = {}; currentSection = 0; errors = {};
+  data = {}; currentSection = 0; errors = {}; isSubmitted = false;
   initDefaults();
-  app.dataset.submitted = '';
   window.scrollTo({top:0,behavior:'smooth'});
   render();
 }
 
-// Initial render
 render();
 </script>
 </body>
