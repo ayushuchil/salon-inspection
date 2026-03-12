@@ -167,18 +167,27 @@ const SECTIONS = [
   ]},
   { title: "🧹 Cleanliness", fields: [
     { id:"frontArea", label:"A. Front Area", type:"radio", options:["Clean","Unclean"], required:true },
+    { id:"frontAreaNote", label:"Comment (Front Area)", type:"text", placeholder:"What was the issue?", condition: d => d.frontArea==="Unclean" },
     { id:"backArea", label:"B. Back Area", type:"radio", options:["Clean","Unclean"], required:true },
+    { id:"backAreaNote", label:"Comment (Back Area)", type:"text", placeholder:"What was the issue?", condition: d => d.backArea==="Unclean" },
     { id:"store", label:"C. Store", type:"radio", options:["Clean","Unclean"], required:true },
+    { id:"storeNote", label:"Comment (Store)", type:"text", placeholder:"What was the issue?", condition: d => d.store==="Unclean" },
     { id:"fridge", label:"D. Fridge", type:"radio", options:["Clean","Unclean"], required:true },
+    { id:"fridgeNote", label:"Comment (Fridge)", type:"text", placeholder:"What was the issue?", condition: d => d.fridge==="Unclean" },
     { id:"washBasin", label:"E. Wash Basin", type:"radio", options:["Clean","Unclean"], required:true },
+    { id:"washBasinNote", label:"Comment (Wash Basin)", type:"text", placeholder:"What was the issue?", condition: d => d.washBasin==="Unclean" },
     { id:"trolley", label:"F. Trolley", type:"radio", options:["Clean","Unclean"], required:true },
+    { id:"trolleyNote", label:"Comment (Trolley)", type:"text", placeholder:"What was the issue?", condition: d => d.trolley==="Unclean" },
   ]},
   { title: "💼 Service Standards", fields: [
     { id:"personalChats", label:"8. Staff having personal chats with customer present?", type:"radio", options:["Yes","No"], required:true },
+    { id:"personalChatsNote", label:"Comment (personal chats)", type:"text", placeholder:"Who / details?", condition: d => d.personalChats==="Yes" },
     { id:"offeringWater", label:"9. Staff offering water before service?", type:"radio", options:["Yes","No"], required:true },
+    { id:"offeringWaterNote", label:"Comment (not offering water)", type:"text", placeholder:"Who / details?", condition: d => d.offeringWater==="No" },
     { id:"extraServices", label:"10. Staff informing about extra services?", type:"radio", options:["Yes","No"], required:true },
+    { id:"extraServicesNote", label:"Comment (not informing extras)", type:"text", placeholder:"Who / details?", condition: d => d.extraServices==="No" },
     { id:"receipt", label:"11. Staff making receipt before charging?", type:"radio", options:["Yes","No"], required:true },
-    { id:"serviceIssueDetails", label:"If any issues, add staff details here:", type:"text", placeholder:"Optional" },
+    { id:"receiptNote", label:"Comment (no receipt)", type:"text", placeholder:"Who / details?", condition: d => d.receipt==="No" },
   ]},
   { title: "⚠️ Issues & Notes", fields: [
     { id:"staffMissing", label:"12. Any staff missing without reason?", type:"radio", options:["Yes","No"], required:true },
@@ -289,8 +298,6 @@ function generateSummary() {
   const time = data.inspTime || new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
   const clean = ["frontArea","backArea","store","fridge","washBasin","trolley"];
   const cleanCount = clean.filter(k => data[k]==="Clean").length;
-  const areaLabels = {frontArea:"Front",backArea:"Back",store:"Store",fridge:"Fridge",washBasin:"Basin",trolley:"Trolley"};
-  const unclean = clean.filter(k => data[k]==="Unclean").map(k => areaLabels[k]);
   const serviceGood = ["offeringWater","extraServices","receipt"].filter(k => data[k]==="Yes").length;
   const chatIssue = data.personalChats==="Yes";
 
@@ -313,14 +320,30 @@ function generateSummary() {
   l.push(`  Uniform: ${uniStr}${data.uniformNames?" ("+data.uniformNames+")":""}`);
   l.push("");
   l.push(`*CLEANLINESS* ${cleanCount}/6`);
-  l.push(unclean.length===0?"  All areas clean ✅":`  ❌ Unclean: ${unclean.join(", ")}`);
+  const cleanItems = [
+    ["frontArea","Front Area"],["backArea","Back Area"],["store","Store"],
+    ["fridge","Fridge"],["washBasin","Wash Basin"],["trolley","Trolley"]
+  ];
+  cleanItems.forEach(([key, name]) => {
+    const isClean = data[key]==="Clean";
+    let line = `  ${isClean?"✅":"❌"} ${name}`;
+    if (!isClean && data[key+"Note"]) line += ` — ${data[key+"Note"]}`;
+    l.push(line);
+  });
   l.push("");
   l.push(`*SERVICE STANDARDS* ${serviceGood}/3 good${chatIssue?" ":""}`);
-  l.push(`  Personal chats: ${chatIssue?"❌ Yes":"✅ No"}`);
-  l.push(`  Offering water: ${data.offeringWater==="Yes"?"✅":"❌"}`);
-  l.push(`  Extra services: ${data.extraServices==="Yes"?"✅":"❌"}`);
-  l.push(`  Receipt before payment: ${data.receipt==="Yes"?"✅":"❌"}`);
-  if(data.serviceIssueDetails){l.push(`   ${data.serviceIssueDetails}`);}
+  let chatLine = `  Personal chats: ${chatIssue?"❌ Yes":"✅ No"}`;
+  if (chatIssue && data.personalChatsNote) chatLine += ` — ${data.personalChatsNote}`;
+  l.push(chatLine);
+  let waterLine = `  Offering water: ${data.offeringWater==="Yes"?"✅":"❌"}`;
+  if (data.offeringWater==="No" && data.offeringWaterNote) waterLine += ` — ${data.offeringWaterNote}`;
+  l.push(waterLine);
+  let extraLine = `  Extra services: ${data.extraServices==="Yes"?"✅":"❌"}`;
+  if (data.extraServices==="No" && data.extraServicesNote) extraLine += ` — ${data.extraServicesNote}`;
+  l.push(extraLine);
+  let rcptLine = `  Receipt before payment: ${data.receipt==="Yes"?"✅":"❌"}`;
+  if (data.receipt==="No" && data.receiptNote) rcptLine += ` — ${data.receiptNote}`;
+  l.push(rcptLine);
   if(data.staffMissing==="Yes"){l.push("");l.push(` *STAFF MISSING*: ${data.missingName||"?"} (${data.missingMins||"?"} mins)`);}
   if(data.goodService||data.poorService){l.push("");if(data.goodService)l.push(` Good service: ${data.goodService}`);if(data.poorService)l.push(` Poor service: ${data.poorService}`);}
   if(data.observations){l.push("");l.push(` ${data.observations}`);}
