@@ -153,7 +153,7 @@ const SECTIONS = [
     { id:"salon", label:"Salon", type:"select", options:SALONS, required:true },
     { id:"inspDate", label:"Date", type:"date", required:true },
     { id:"inspTime", label:"Time", type:"time", required:true },
-    { id:"staffOnDuty", label:"Staff on Duty", type:"text", placeholder:"e.g. Ahmed, Sara, Priya", required:true },
+    { id:"staffOnDuty", label:"Staff on Duty", type:"text", placeholder:"Enter names of staff on Duty", required:true },
   ]},
   { title: "👋 First Impressions", fields: [
     { id:"smile", label:"1. Did staff acknowledge with a smile?", type:"radio", options:["Yes","No"], required:true },
@@ -175,6 +175,7 @@ const SECTIONS = [
   ]},
   { title: "💼 Service Standards", fields: [
     { id:"personalChats", label:"8. Staff having personal chats with customer present?", type:"radio", options:["Yes","No"], required:true },
+    { id:"chatNames", label:"Who was chatting?", type:"text", placeholder:"Name(s)", condition: d => d.personalChats==="Yes" },
     { id:"offeringWater", label:"9. Staff offering water before service?", type:"radio", options:["Yes","No"], required:true },
     { id:"extraServices", label:"10. Staff informing about extra services?", type:"radio", options:["Yes","No"], required:true },
     { id:"receipt", label:"11. Staff making receipt before charging?", type:"radio", options:["Yes","No"], required:true },
@@ -315,7 +316,7 @@ function generateSummary() {
   l.push(unclean.length===0?"  All areas clean ✅":`  ❌ Unclean: ${unclean.join(", ")}`);
   l.push("");
   l.push(`*SERVICE STANDARDS* ${serviceGood}/3 good${chatIssue?" ⚠️":""}`);
-  l.push(`  Personal chats: ${chatIssue?"❌ Yes (issue)":"✅ No"}`);
+  l.push(`  Personal chats: ${chatIssue?"❌ Yes"+(data.chatNames?" ("+data.chatNames+")":""):"✅ No"}`);
   l.push(`  Offering water: ${data.offeringWater==="Yes"?"✅":"❌"}`);
   l.push(`  Extra services: ${data.extraServices==="Yes"?"✅":"❌"}`);
   l.push(`  Receipt: ${data.receipt==="Yes"?"✅":"❌"}`);
