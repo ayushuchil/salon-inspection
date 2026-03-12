@@ -331,7 +331,7 @@ function generateSummary() {
     l.push(line);
   });
   l.push("");
-  l.push(`*SERVICE STANDARDS* ${serviceGood}/3 good${chatIssue?" ":""}`);
+  l.push(`*SERVICE STANDARDS* ${serviceGood}/4 good${chatIssue?" ":""}`);
   let chatLine = `  Personal chats: ${chatIssue?"❌ Yes":"✅ No"}`;
   if (chatIssue && data.personalChatsNote) chatLine += ` — ${data.personalChatsNote}`;
   l.push(chatLine);
