@@ -137,12 +137,14 @@
 
 <script>
 // ─── CONFIG: Edit salon names here ───
-const SALONS = ["LuLu", "Bahrain Mall", "Hidd", "In & Out"];
+const SALONS = ["LuLu", "Bahrain Mall", "In and Out", "Hidd"];
 
 // ─── FORM STRUCTURE ───
 const SECTIONS = [
   { title: "📋 Basic Info", fields: [
     { id:"salon", label:"Salon", type:"select", options:SALONS, required:true },
+    { id:"inspDate", label:"Date", type:"date", required:true },
+    { id:"inspTime", label:"Time", type:"time", required:true },
     { id:"staffOnDuty", label:"Staff on Duty", type:"text", placeholder:"e.g. Ahmed, Sara, Priya", required:true },
   ]},
   { title: "👋 First Impressions", fields: [
@@ -184,6 +186,14 @@ let currentSection = 0;
 let errors = {};
 const app = document.getElementById('app');
 
+// Default date/time to now
+function initDefaults() {
+  const now = new Date();
+  data.inspDate = now.toISOString().slice(0,10);
+  data.inspTime = now.toTimeString().slice(0,5);
+}
+initDefaults();
+
 function set(id, val) {
   data[id] = val;
   delete errors[id];
@@ -218,9 +228,9 @@ function validateSection(idx) {
 }
 
 function generateSummary() {
-  const now = new Date();
-  const date = now.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
-  const time = now.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+  const d = data.inspDate ? new Date(data.inspDate) : new Date();
+  const date = d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
+  const time = data.inspTime || new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
   const clean = ["frontArea","backArea","store","fridge","washBasin","trolley"];
   const cleanCount = clean.filter(k => data[k]==="Clean").length;
   const areaLabels = {frontArea:"Front",backArea:"Back",store:"Store",fridge:"Fridge",washBasin:"Basin",trolley:"Trolley"};
@@ -297,6 +307,10 @@ function renderForm() {
       html += `</select>`;
     } else if (f.type === "text") {
       html += `<input type="text" class="${hasErr?'error':''}" value="${data[f.id]||''}" placeholder="${f.placeholder||''}" oninput="set('${f.id}',this.value)">`;
+    } else if (f.type === "date") {
+      html += `<input type="date" class="${hasErr?'error':''}" value="${data[f.id]||''}" onchange="set('${f.id}',this.value)">`;
+    } else if (f.type === "time") {
+      html += `<input type="time" class="${hasErr?'error':''}" value="${data[f.id]||''}" onchange="set('${f.id}',this.value)">`;
     } else if (f.type === "textarea") {
       html += `<textarea placeholder="${f.placeholder||''}" oninput="set('${f.id}',this.value)">${data[f.id]||''}</textarea>`;
     }
@@ -378,6 +392,7 @@ function copyText() {
 
 function resetForm() {
   data = {}; currentSection = 0; errors = {};
+  initDefaults();
   app.dataset.submitted = '';
   window.scrollTo({top:0,behavior:'smooth'});
   render();
