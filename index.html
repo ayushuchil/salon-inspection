@@ -19,17 +19,11 @@
     -webkit-tap-highlight-color: transparent;
   }
   .container { max-width: 500px; margin: 0 auto; padding: 16px; padding-bottom: 110px; }
-
-  /* Header */
   .header { text-align: center; padding: 16px 0 8px; }
   .header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
   .header .step { font-size: 13px; color: #888; }
-
-  /* Progress */
   .progress-track { height: 4px; background: #e5e7eb; border-radius: 4px; margin: 8px 0 24px; overflow: hidden; }
   .progress-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a); border-radius: 4px; transition: width 0.4s ease; }
-
-  /* Card */
   .card {
     background: #fff; border-radius: 20px; padding: 24px 20px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.04);
@@ -38,8 +32,6 @@
     font-size: 18px; font-weight: 700; margin-bottom: 20px;
     padding-bottom: 12px; border-bottom: 2px solid #f0f0f0;
   }
-
-  /* Fields */
   .field { margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid #f5f5f5; }
   .field:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
   .field label {
@@ -48,8 +40,6 @@
   }
   .field label.error { color: #dc2626; }
   .field label .req { color: #dc2626; margin-left: 3px; }
-
-  /* Radio buttons */
   .radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
   .radio-btn {
     padding: 10px 18px; border-radius: 10px; border: 2px solid #ddd;
@@ -63,8 +53,6 @@
   .radio-btn.selected.neutral { background: #fef3c7; }
   .radio-btn.selected.negative { background: #fee2e2; }
   .radio-btn:active { transform: scale(0.97); }
-
-  /* Inputs */
   input[type="text"], input[type="date"], input[type="time"], select, textarea {
     width: 100%; padding: 12px 14px; border-radius: 10px; border: 2px solid #ddd;
     font-size: 15px; font-family: inherit; background: #fff; color: #1a1a1a;
@@ -75,8 +63,6 @@
   textarea { resize: vertical; min-height: 80px; }
   select { color: #999; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center; padding-right: 36px; }
   select.has-value { color: #1a1a1a; }
-
-  /* Navigation */
   .nav { display: flex; gap: 10px; margin-top: 20px; position: sticky; bottom: 16px; z-index: 10; }
   .btn-back {
     flex: 0 0 auto; padding: 16px 24px; border-radius: 14px; border: 2px solid #ddd;
@@ -91,20 +77,16 @@
   }
   .btn-next.submit { background: linear-gradient(135deg, #22c55e, #16a34a); }
   .btn-next:active, .btn-back:active { transform: scale(0.98); }
-
-  /* Result page */
   .result-header { text-align: center; padding: 24px 0 16px; }
   .result-header .icon { font-size: 48px; margin-bottom: 8px; }
   .result-header h2 { font-size: 22px; font-weight: 700; }
   .result-header p { color: #666; font-size: 14px; margin-top: 6px; }
-
   .summary-box {
     background: #1a1a1a; border-radius: 16px; padding: 20px; margin: 12px 0;
     font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.6;
     color: #e5e5e5; white-space: pre-wrap; word-break: break-word;
     max-height: 400px; overflow-y: auto; -webkit-overflow-scrolling: touch;
   }
-
   .btn-wa {
     width: 100%; padding: 16px; border-radius: 14px; border: none;
     background: #25D366; color: #fff; font-size: 17px; font-weight: 700;
@@ -117,16 +99,7 @@
     transition: all 0.2s ease;
   }
   .btn-copy.copied { background: #dcfce7; border-color: #86efac; color: #166534; }
-  .btn-reset {
-    width: 100%; padding: 14px; border-radius: 14px; border: none;
-    background: transparent; color: #888; font-size: 15px; font-weight: 500;
-    cursor: pointer; font-family: inherit;
-  }
-
-  /* Hide on result */
   .hidden { display: none !important; }
-
-  /* Smooth transitions */
   .card { animation: fadeIn 0.25s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 </style>
@@ -136,26 +109,23 @@
 <div class="container" id="app"></div>
 
 <script>
-// ─── CONFIG: Edit salon names here ───
 const SALONS = ["Dana", "LuLu Hidd", "Bahrain Mall", "In & Out"];
 
-// ─── Inspection code map ───
 const CODE_MAP = {
   "Dana": "dana",
-  "Lulu Hidd": "luluhidd",
+  "LuLu Hidd": "luluhidd",
   "Bahrain Mall": "bahrainmall",
   "In & Out": "inandout"
 };
 
-// ─── FORM STRUCTURE ───
 const SECTIONS = [
-  { title: "📋 Basic Info", fields: [
+  { title: "\u{1F4CB} Basic Info", fields: [
     { id:"salon", label:"Salon", type:"select", options:SALONS, required:true },
     { id:"inspDate", label:"Date", type:"date", required:true },
     { id:"inspTime", label:"Time", type:"time", required:true },
     { id:"staffOnDuty", label:"Staff on Duty", type:"text", placeholder:"Enter names of staff on shift.", required:true },
   ]},
-  { title: "👋 First Impressions", fields: [
+  { title: "\u{1F44B} First Impressions", fields: [
     { id:"smile", label:"1. Did staff acknowledge with a smile?", type:"radio", options:["Yes","No"], required:true },
     { id:"smileNames", label:"Names (no smile)", type:"text", placeholder:"Optional", condition: d => d.smile==="No" },
     { id:"music", label:"2. Was the music on?", type:"radio", options:["Yes","No"], required:true },
@@ -165,7 +135,7 @@ const SECTIONS = [
     { id:"uniform", label:"6. Uniform and grooming?", type:"radio", options:["Good","Fair","Bad"], required:true },
     { id:"uniformNames", label:"Names (poor grooming)", type:"text", placeholder:"Optional", condition: d => d.uniform==="Fair"||d.uniform==="Bad" },
   ]},
-  { title: "🧹 Cleanliness", fields: [
+  { title: "\u{1F9F9} Cleanliness", fields: [
     { id:"frontArea", label:"A. Front Area", type:"radio", options:["Clean","Unclean"], required:true },
     { id:"frontAreaNote", label:"Comment (Front Area)", type:"text", placeholder:"What was the issue?", condition: d => d.frontArea==="Unclean" },
     { id:"backArea", label:"B. Back Area", type:"radio", options:["Clean","Unclean"], required:true },
@@ -179,7 +149,7 @@ const SECTIONS = [
     { id:"trolley", label:"F. Trolley", type:"radio", options:["Clean","Unclean"], required:true },
     { id:"trolleyNote", label:"Comment (Trolley)", type:"text", placeholder:"What was the issue?", condition: d => d.trolley==="Unclean" },
   ]},
-  { title: "💼 Service Standards", fields: [
+  { title: "\u{1F4BC} Service Standards", fields: [
     { id:"personalChats", label:"8. Staff having personal chats with customer present?", type:"radio", options:["Yes","No"], required:true },
     { id:"personalChatsNote", label:"Comment (personal chats)", type:"text", placeholder:"Who / details?", condition: d => d.personalChats==="Yes" },
     { id:"offeringWater", label:"9. Staff offering water before service?", type:"radio", options:["Yes","No"], required:true },
@@ -188,14 +158,18 @@ const SECTIONS = [
     { id:"extraServicesNote", label:"Comment (not informing extras)", type:"text", placeholder:"Who / details?", condition: d => d.extraServices==="No" },
     { id:"receipt", label:"11. Staff making receipt before charging?", type:"radio", options:["Yes","No"], required:true },
     { id:"receiptNote", label:"Comment (no receipt)", type:"text", placeholder:"Who / details?", condition: d => d.receipt==="No" },
+    { id:"eatingInside", label:"12. Was any staff eating inside the salon?", type:"radio", options:["Yes","No"], required:true },
+    { id:"eatingInsideNote", label:"Comment (eating inside)", type:"text", placeholder:"Who / details?", condition: d => d.eatingInside==="Yes" },
+    { id:"nextBarberReady", label:"13. As per turns, was the next barber ready with apron to welcome next customer?", type:"radio", options:["Yes","No"], required:true },
+    { id:"nextBarberReadyNote", label:"Comment (barber not ready)", type:"text", placeholder:"Who / details?", condition: d => d.nextBarberReady==="No" },
   ]},
-  { title: "⚠️ Issues & Notes", fields: [
-    { id:"staffMissing", label:"12. Any staff missing without reason?", type:"radio", options:["Yes","No"], required:true },
+  { title: "\u{26A0}\u{FE0F} Issues & Notes", fields: [
+    { id:"staffMissing", label:"14. Any staff missing without reason?", type:"radio", options:["Yes","No"], required:true },
     { id:"missingName", label:"Missing staff name", type:"text", placeholder:"Name", condition: d => d.staffMissing==="Yes" },
     { id:"missingMins", label:"Minutes missing", type:"text", placeholder:"e.g. 15", condition: d => d.staffMissing==="Yes" },
-    { id:"goodService", label:"13. Who showed good customer service?", type:"text", placeholder:"Name(s)" },
-    { id:"poorService", label:"14. Who showed poor customer service?", type:"text", placeholder:"Optional" },
-    { id:"observations", label:"15. Other observations", type:"textarea", placeholder:"Any other notes..." },
+    { id:"goodService", label:"15. Who showed good customer service?", type:"text", placeholder:"Name(s)" },
+    { id:"poorService", label:"16. Who showed poor customer service?", type:"text", placeholder:"Optional" },
+    { id:"observations", label:"17. Other observations", type:"textarea", placeholder:"Any other notes..." },
   ]},
 ];
 
@@ -212,22 +186,18 @@ function initDefaults() {
 }
 initDefaults();
 
-// ─── QUIET SET: text/date/time inputs store data WITHOUT re-rendering ───
 function setQuiet(id, val) {
   data[id] = val;
   delete errors[id];
-  // Just clear error styling if present, no DOM rebuild
   const label = document.querySelector(`[data-field="${id}"] label`);
   if (label) label.classList.remove('error');
 }
 
-// ─── RADIO/SELECT SET: needs re-render only if conditional fields change ───
 function set(id, val) {
   const oldVal = data[id];
   data[id] = val;
   delete errors[id];
 
-  // Check if any conditional field visibility would change
   const section = SECTIONS[currentSection];
   const needsRebuild = section.fields.some(f => {
     if (!f.condition) return false;
@@ -239,7 +209,6 @@ function set(id, val) {
   if (needsRebuild) {
     renderForm();
   } else {
-    // Just update button styles in-place
     updateRadioButtons(id, val);
   }
 }
@@ -252,7 +221,6 @@ function updateRadioButtons(fieldId, selectedVal) {
     const sel = opt === selectedVal;
     btn.className = 'radio-btn' + (sel ? ' selected ' + classifyForField(fieldId, opt) : '');
   });
-  // Clear error on label
   const label = document.querySelector(`[data-field="${fieldId}"] label`);
   if (label) label.classList.remove('error');
 }
@@ -263,7 +231,7 @@ function classifyOption(opt) {
   return "negative";
 }
 
-const FLIP_IDS = new Set(["personalChats"]);
+const FLIP_IDS = new Set(["personalChats","eatingInside"]);
 function classifyForField(fieldId, opt) {
   const cls = classifyOption(opt);
   if (FLIP_IDS.has(fieldId)) {
@@ -292,31 +260,42 @@ function getInspectionCode() {
   return code + dd + mm + yy;
 }
 
+function svcLine(label, isGood, noteKey) {
+  let line = `  ${isGood?"\u2705":"\u274C"} ${label}`;
+  if (!isGood && data[noteKey]) line += ` \u2014 ${data[noteKey]}`;
+  return line;
+}
+
 function generateSummary() {
   const d = data.inspDate ? new Date(data.inspDate) : new Date();
   const date = d.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"});
   const time = data.inspTime || new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
   const clean = ["frontArea","backArea","store","fridge","washBasin","trolley"];
   const cleanCount = clean.filter(k => data[k]==="Clean").length;
-  const serviceGood = ["offeringWater","extraServices","receipt"].filter(k => data[k]==="Yes").length;
+  const svcKeys = ["offeringWater","extraServices","receipt","nextBarberReady"];
+  const svcGoodCount = svcKeys.filter(k => data[k]==="Yes").length;
   const chatIssue = data.personalChats==="Yes";
+  const eatingIssue = data.eatingInside==="Yes";
+  const svcTotal = svcKeys.length + 2; // +2 for personalChats and eatingInside (inverted)
+
+  let svcScore = svcGoodCount + (chatIssue ? 0 : 1) + (eatingIssue ? 0 : 1);
 
   let l = [];
-  l.push("━━━━━━━━━━━━━━━━━━━━");
-  l.push("📋 *SALON INSPECTION*");
-  l.push("━━━━━━━━━━━━━━━━━━━━");
+  l.push("\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501");
+  l.push("\u{1F4CB} *SALON INSPECTION*");
+  l.push("\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501");
   l.push(`ID: *${getInspectionCode()}*`);
   l.push(` *${data.salon}*`);
   l.push(` ${date}   ${time}`);
   l.push(` Staff on duty: ${data.staffOnDuty}`);
   l.push("");
   l.push("*FIRST IMPRESSIONS*");
-  l.push(`  Smile: ${data.smile==="Yes"?"✅":"❌ "+(data.smileNames||"")}`);
-  l.push(`  Music: ${data.music==="Yes"?"✅":"❌"}`);
-  l.push(`  Smell: ${data.smell==="Good"?"✅ Good":data.smell==="Fair"?"⚠️ Fair":"❌ Bad"}`);
-  l.push(`  Fountain: ${data.fountain==="Yes"?"✅":"❌"}`);
-  l.push(`  AC: ${data.ac==="Yes"?"✅":"❌"}`);
-  const uniStr = data.uniform==="Good"?"✅ Good":data.uniform==="Fair"?"⚠️ Fair":"❌ Bad";
+  l.push(`  Smile: ${data.smile==="Yes"?"\u2705":"\u274C "+(data.smileNames||"")}`);
+  l.push(`  Music: ${data.music==="Yes"?"\u2705":"\u274C"}`);
+  l.push(`  Smell: ${data.smell==="Good"?"\u2705 Good":data.smell==="Fair"?"\u26A0\uFE0F Fair":"\u274C Bad"}`);
+  l.push(`  Fountain: ${data.fountain==="Yes"?"\u2705":"\u274C"}`);
+  l.push(`  AC: ${data.ac==="Yes"?"\u2705":"\u274C"}`);
+  const uniStr = data.uniform==="Good"?"\u2705 Good":data.uniform==="Fair"?"\u26A0\uFE0F Fair":"\u274C Bad";
   l.push(`  Uniform: ${uniStr}${data.uniformNames?" ("+data.uniformNames+")":""}`);
   l.push("");
   l.push(`*CLEANLINESS* ${cleanCount}/6`);
@@ -325,29 +304,23 @@ function generateSummary() {
     ["fridge","Fridge"],["washBasin","Wash Basin"],["trolley","Trolley"]
   ];
   cleanItems.forEach(([key, name]) => {
-    const isClean = data[key]==="Clean";
-    let line = `  ${isClean?"✅":"❌"} ${name}`;
-    if (!isClean && data[key+"Note"]) line += ` — ${data[key+"Note"]}`;
+    const ok = data[key]==="Clean";
+    let line = `  ${ok?"\u2705":"\u274C"} ${name}`;
+    if (!ok && data[key+"Note"]) line += ` \u2014 ${data[key+"Note"]}`;
     l.push(line);
   });
   l.push("");
-  l.push(`*SERVICE STANDARDS* ${serviceGood}/4 good${chatIssue?" ":""}`);
-  let chatLine = `  Personal chats: ${chatIssue?"❌ Yes":"✅ No"}`;
-  if (chatIssue && data.personalChatsNote) chatLine += ` — ${data.personalChatsNote}`;
-  l.push(chatLine);
-  let waterLine = `  Offering water: ${data.offeringWater==="Yes"?"✅":"❌"}`;
-  if (data.offeringWater==="No" && data.offeringWaterNote) waterLine += ` — ${data.offeringWaterNote}`;
-  l.push(waterLine);
-  let extraLine = `  Extra services offered: ${data.extraServices==="Yes"?"✅":"❌"}`;
-  if (data.extraServices==="No" && data.extraServicesNote) extraLine += ` — ${data.extraServicesNote}`;
-  l.push(extraLine);
-  let rcptLine = `  Receipt before payment: ${data.receipt==="Yes"?"✅":"❌"}`;
-  if (data.receipt==="No" && data.receiptNote) rcptLine += ` — ${data.receiptNote}`;
-  l.push(rcptLine);
-  if(data.staffMissing==="Yes"){l.push("");l.push(` *STAFF MISSING*: ${data.missingName||"?"} (${data.missingMins||"?"} mins)`);}
-  if(data.goodService||data.poorService){l.push("");if(data.goodService)l.push(` Good service: ${data.goodService}`);if(data.poorService)l.push(` Poor service: ${data.poorService}`);}
-  if(data.observations){l.push("");l.push(` ${data.observations}`);}
-  l.push("");l.push("━━━━━━━━━━━━━━━━━━━━");
+  l.push(`*SERVICE STANDARDS* ${svcScore}/${svcTotal}`);
+  l.push(svcLine("Personal chats", !chatIssue, "personalChatsNote"));
+  l.push(svcLine("Offering water", data.offeringWater==="Yes", "offeringWaterNote"));
+  l.push(svcLine("Extra services offered", data.extraServices==="Yes", "extraServicesNote"));
+  l.push(svcLine("Receipt before payment", data.receipt==="Yes", "receiptNote"));
+  l.push(svcLine("Staff eating inside", !eatingIssue, "eatingInsideNote"));
+  l.push(svcLine("Next barber ready", data.nextBarberReady==="Yes", "nextBarberReadyNote"));
+  if(data.staffMissing==="Yes"){l.push("");l.push(`\u26A0\uFE0F *STAFF MISSING*: ${data.missingName||"?"} (${data.missingMins||"?"} mins)`);}
+  if(data.goodService||data.poorService){l.push("");if(data.goodService)l.push(`\u2B50 Good service: ${data.goodService}`);if(data.poorService)l.push(`\u26D4 Poor service: ${data.poorService}`);}
+  if(data.observations){l.push("");l.push(`\u{1F4DD} ${data.observations}`);}
+  l.push("");l.push("\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501");
   return l.join("\n");
 }
 
@@ -401,8 +374,8 @@ function renderForm() {
   });
 
   html += `</div><div class="nav">`;
-  if (currentSection > 0) html += `<button class="btn-back" onclick="prev()">←</button>`;
-  html += `<button class="btn-next${isLast?' submit':''}" onclick="${isLast?'doSubmit':'next'}()">${isLast?'✓ Submit Inspection':'Next →'}</button>`;
+  if (currentSection > 0) html += `<button class="btn-back" onclick="prev()">\u2190</button>`;
+  html += `<button class="btn-next${isLast?' submit':''}" onclick="${isLast?'doSubmit':'next'}()">${isLast?'\u2713 Submit Inspection':'Next \u2192'}</button>`;
   html += `</div>`;
 
   app.innerHTML = html;
@@ -412,15 +385,15 @@ function renderResult() {
   const summary = generateSummary();
   app.innerHTML = `
     <div class="result-header">
-      <div class="icon">✅</div>
+      <div class="icon">\u2705</div>
       <h2>Inspection Complete</h2>
       <p>Send the report via WhatsApp</p>
     </div>
     <div class="summary-box" id="summaryBox">${summary.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
-    <button class="btn-wa" onclick="sendWA()">📲 Send via WhatsApp</button>
-    <button class="btn-copy" id="copyBtn" onclick="copyText()">📋 Copy to Clipboard</button>
+    <button class="btn-wa" onclick="sendWA()">\u{1F4F2} Send via WhatsApp</button>
+    <button class="btn-copy" id="copyBtn" onclick="copyText()">\u{1F4CB} Copy to Clipboard</button>
     <div class="nav" style="position:relative;margin-top:16px;">
-      <button class="btn-back" onclick="goBack()">← Back</button>
+      <button class="btn-back" onclick="goBack()">\u2190 Back</button>
       <button class="btn-next" onclick="resetForm()" style="background:linear-gradient(135deg,#64748b,#475569);box-shadow:0 4px 12px rgba(71,85,105,0.3);">New Inspection</button>
     </div>`;
 }
@@ -468,17 +441,17 @@ function copyText() {
   const btn = document.getElementById('copyBtn');
   if (navigator.clipboard) {
     navigator.clipboard.writeText(text).then(() => {
-      btn.textContent = '✅ Copied!';
+      btn.textContent = '\u2705 Copied!';
       btn.classList.add('copied');
-      setTimeout(() => { btn.textContent = '📋 Copy to Clipboard'; btn.classList.remove('copied'); }, 2500);
+      setTimeout(() => { btn.textContent = '\u{1F4CB} Copy to Clipboard'; btn.classList.remove('copied'); }, 2500);
     });
   } else {
     const ta = document.createElement('textarea');
     ta.value = text; document.body.appendChild(ta); ta.select();
     document.execCommand('copy'); document.body.removeChild(ta);
-    btn.textContent = '✅ Copied!';
+    btn.textContent = '\u2705 Copied!';
     btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = '📋 Copy to Clipboard'; btn.classList.remove('copied'); }, 2500);
+    setTimeout(() => { btn.textContent = '\u{1F4CB} Copy to Clipboard'; btn.classList.remove('copied'); }, 2500);
   }
 }
 
