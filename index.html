@@ -127,7 +127,8 @@ const SECTIONS = [
   ]},
   { title: "\u{1F44B} First Impressions", fields: [
     { id:"smile", label:"1. Did staff acknowledge with a smile?", type:"radio", options:["Yes","No"], required:true },
-    { id:"smileNames", label:"Names (no smile)", type:"text", placeholder:"Optional", condition: d => d.smile==="No" },
+    { id:"smileNamesGood", label:"Who greeted well?", type:"text", placeholder:"Name(s)", condition: d => d.smile==="Yes" },
+    { id:"smileNames", label:"Who did not greet?", type:"text", placeholder:"Name(s)", condition: d => d.smile==="No" },
     { id:"music", label:"2. Was the music on?", type:"radio", options:["Yes","No"], required:true },
     { id:"smell", label:"3. How was the smell?", type:"radio", options:["Good","Fair","Bad"], required:true },
     { id:"fountain", label:"4. Was water fountain on?", type:"radio", options:["Yes","No"], required:true },
@@ -147,16 +148,20 @@ const SECTIONS = [
     { id:"washBasin", label:"E. Wash Basin", type:"radio", options:["Clean","Unclean"], required:true },
     { id:"washBasinNote", label:"Comment (Wash Basin)", type:"text", placeholder:"What was the issue?", condition: d => d.washBasin==="Unclean" },
     { id:"trolley", label:"F. Trolley", type:"radio", options:["Clean","Unclean"], required:true },
-    { id:"trolleyNote", label:"Comment (Trolley)", type:"text", placeholder:"What was the issue?", condition: d => d.trolley==="Unclean" },
+    { id:"trolleyNoteGood", label:"Well-kept trolleys (name the barber)", type:"text", placeholder:"Name(s)", condition: d => d.trolley==="Clean" },
+    { id:"trolleyNote", label:"Comment (Trolley)", type:"text", placeholder:"What was the issue? Whose trolley?", condition: d => d.trolley==="Unclean" },
   ]},
   { title: "\u{1F4BC} Service Standards", fields: [
-    { id:"personalChats", label:"8. Staff having personal chats with customer present?", type:"radio", options:["Yes","No"], required:true },
+    { id:"personalChats", label:"8. Staff having personal chats with customer present?", type:"radio", options:["Yes","No","No customer"], required:true },
     { id:"personalChatsNote", label:"Comment (personal chats)", type:"text", placeholder:"Who / details?", condition: d => d.personalChats==="Yes" },
-    { id:"offeringWater", label:"9. Staff offering water before service?", type:"radio", options:["Yes","No"], required:true },
+    { id:"offeringWater", label:"9. Staff offering water before service?", type:"radio", options:["Yes","No","No customer"], required:true },
+    { id:"offeringWaterYesNote", label:"Comment (good practice)", type:"text", placeholder:"Who offered?", condition: d => d.offeringWater==="Yes" },
     { id:"offeringWaterNote", label:"Comment (not offering water)", type:"text", placeholder:"Who / details?", condition: d => d.offeringWater==="No" },
-    { id:"extraServices", label:"10. Staff informing about extra services?", type:"radio", options:["Yes","No"], required:true },
+    { id:"extraServices", label:"10. Staff informing about extra services?", type:"radio", options:["Yes","No","No customer"], required:true },
+    { id:"extraServicesYesNote", label:"Comment (good practice)", type:"text", placeholder:"Who informed?", condition: d => d.extraServices==="Yes" },
     { id:"extraServicesNote", label:"Comment (not informing extras)", type:"text", placeholder:"Who / details?", condition: d => d.extraServices==="No" },
-    { id:"receipt", label:"11. Staff making receipt before charging?", type:"radio", options:["Yes","No"], required:true },
+    { id:"receipt", label:"11. Staff making receipt before charging?", type:"radio", options:["Yes","No","No customer"], required:true },
+    { id:"receiptYesNote", label:"Comment (good practice)", type:"text", placeholder:"Details?", condition: d => d.receipt==="Yes" },
     { id:"receiptNote", label:"Comment (no receipt)", type:"text", placeholder:"Who / details?", condition: d => d.receipt==="No" },
     { id:"eatingInside", label:"12. Was any staff eating inside the salon?", type:"radio", options:["Yes","No"], required:true },
     { id:"eatingInsideNote", label:"Comment (eating inside)", type:"text", placeholder:"Who / details?", condition: d => d.eatingInside==="Yes" },
@@ -227,7 +232,7 @@ function updateRadioButtons(fieldId, selectedVal) {
 
 function classifyOption(opt) {
   if (["Yes","Good","Clean"].includes(opt)) return "positive";
-  if (["Fair"].includes(opt)) return "neutral";
+  if (["Fair","No customer"].includes(opt)) return "neutral";
   return "negative";
 }
 
@@ -260,10 +265,24 @@ function getInspectionCode() {
   return code + dd + mm + yy;
 }
 
-function svcLine(label, isGood, noteKey) {
-  let line = `  ${isGood?"\u2705":"\u274C"} ${label}`;
-  if (!isGood && data[noteKey]) line += ` \u2014 ${data[noteKey]}`;
+function svcLine(label, status, noteKeyBad, noteKeyGood) {
+  // status: "good", "bad", "na"
+  if (status === "na") return `  \u2796 ${label} (N/A)`;
+  let icon = status === "good" ? "\u2705" : "\u274C";
+  let line = `  ${icon} ${label}`;
+  if (status === "bad" && data[noteKeyBad]) line += ` \u2014 ${data[noteKeyBad]}`;
+  if (status === "good" && noteKeyGood && data[noteKeyGood]) line += ` \u2014 ${data[noteKeyGood]}`;
   return line;
+}
+
+function svcStatus(key, invertKey) {
+  // For inverted keys (personalChats, eatingInside): Yes=bad, No=good
+  // For normal keys: Yes=good, No=bad
+  // "No customer" = na
+  const val = data[key];
+  if (val === "No customer") return "na";
+  if (invertKey) return val === "Yes" ? "bad" : "good";
+  return val === "Yes" ? "good" : "bad";
 }
 
 function generateSummary() {
@@ -272,13 +291,14 @@ function generateSummary() {
   const time = data.inspTime || new Date().toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
   const clean = ["frontArea","backArea","store","fridge","washBasin","trolley"];
   const cleanCount = clean.filter(k => data[k]==="Clean").length;
-  const svcKeys = ["offeringWater","extraServices","receipt","nextBarberReady"];
-  const svcGoodCount = svcKeys.filter(k => data[k]==="Yes").length;
-  const chatIssue = data.personalChats==="Yes";
-  const eatingIssue = data.eatingInside==="Yes";
-  const svcTotal = svcKeys.length + 2; // +2 for personalChats and eatingInside (inverted)
-
-  let svcScore = svcGoodCount + (chatIssue ? 0 : 1) + (eatingIssue ? 0 : 1);
+  const svcKeys = ["personalChats","offeringWater","extraServices","receipt","eatingInside","nextBarberReady"];
+  const invertedKeys = new Set(["personalChats","eatingInside"]);
+  let svcApplicable = 0;
+  let svcGood = 0;
+  svcKeys.forEach(k => {
+    const s = svcStatus(k, invertedKeys.has(k));
+    if (s !== "na") { svcApplicable++; if (s === "good") svcGood++; }
+  });
 
   let l = [];
   l.push("\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501");
@@ -290,7 +310,7 @@ function generateSummary() {
   l.push(` Staff on duty: ${data.staffOnDuty}`);
   l.push("");
   l.push("*FIRST IMPRESSIONS*");
-  l.push(`  Smile: ${data.smile==="Yes"?"\u2705":"\u274C "+(data.smileNames||"")}`);
+  l.push(`  Smile: ${data.smile==="Yes"?"\u2705"+(data.smileNamesGood?" ("+data.smileNamesGood+")":""):"\u274C "+(data.smileNames||"")}`);
   l.push(`  Music: ${data.music==="Yes"?"\u2705":"\u274C"}`);
   l.push(`  Smell: ${data.smell==="Good"?"\u2705 Good":data.smell==="Fair"?"\u26A0\uFE0F Fair":"\u274C Bad"}`);
   l.push(`  Fountain: ${data.fountain==="Yes"?"\u2705":"\u274C"}`);
@@ -307,16 +327,17 @@ function generateSummary() {
     const ok = data[key]==="Clean";
     let line = `  ${ok?"\u2705":"\u274C"} ${name}`;
     if (!ok && data[key+"Note"]) line += ` \u2014 ${data[key+"Note"]}`;
+    if (ok && data[key+"NoteGood"]) line += ` \u2014 ${data[key+"NoteGood"]}`;
     l.push(line);
   });
   l.push("");
-  l.push(`*SERVICE STANDARDS* ${svcScore}/${svcTotal}`);
-  l.push(svcLine("Personal chats", !chatIssue, "personalChatsNote"));
-  l.push(svcLine("Offering water", data.offeringWater==="Yes", "offeringWaterNote"));
-  l.push(svcLine("Extra services offered", data.extraServices==="Yes", "extraServicesNote"));
-  l.push(svcLine("Receipt before payment", data.receipt==="Yes", "receiptNote"));
-  l.push(svcLine("Staff eating inside", !eatingIssue, "eatingInsideNote"));
-  l.push(svcLine("Next barber ready", data.nextBarberReady==="Yes", "nextBarberReadyNote"));
+  l.push(`*SERVICE STANDARDS* ${svcGood}/${svcApplicable}`);
+  l.push(svcLine("Personal chats", svcStatus("personalChats",true), "personalChatsNote"));
+  l.push(svcLine("Offering water", svcStatus("offeringWater",false), "offeringWaterNote", "offeringWaterYesNote"));
+  l.push(svcLine("Extra services offered", svcStatus("extraServices",false), "extraServicesNote", "extraServicesYesNote"));
+  l.push(svcLine("Receipt before payment", svcStatus("receipt",false), "receiptNote", "receiptYesNote"));
+  l.push(svcLine("Staff eating inside", svcStatus("eatingInside",true), "eatingInsideNote"));
+  l.push(svcLine("Next barber ready", svcStatus("nextBarberReady",false), "nextBarberReadyNote"));
   if(data.staffMissing==="Yes"){l.push("");l.push(`\u26A0\uFE0F *STAFF MISSING*: ${data.missingName||"?"} (${data.missingMins||"?"} mins)`);}
   if(data.goodService||data.poorService){l.push("");if(data.goodService)l.push(`\u2B50 Good service: ${data.goodService}`);if(data.poorService)l.push(`\u26D4 Poor service: ${data.poorService}`);}
   if(data.observations){l.push("");l.push(`\u{1F4DD} ${data.observations}`);}
