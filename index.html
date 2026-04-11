@@ -266,7 +266,6 @@ function getInspectionCode() {
 }
 
 function svcLine(label, status, noteKeyBad, noteKeyGood) {
-  // status: "good", "bad", "na"
   if (status === "na") return `  \u2796 ${label} (N/A)`;
   let icon = status === "good" ? "\u2705" : "\u274C";
   let line = `  ${icon} ${label}`;
@@ -276,9 +275,6 @@ function svcLine(label, status, noteKeyBad, noteKeyGood) {
 }
 
 function svcStatus(key, invertKey) {
-  // For inverted keys (personalChats, eatingInside): Yes=bad, No=good
-  // For normal keys: Yes=good, No=bad
-  // "No customer" = na
   const val = data[key];
   if (val === "No customer") return "na";
   if (invertKey) return val === "Yes" ? "bad" : "good";
@@ -336,7 +332,17 @@ function generateSummary() {
   l.push(svcLine("Offering water", svcStatus("offeringWater",false), "offeringWaterNote", "offeringWaterYesNote"));
   l.push(svcLine("Extra services offered", svcStatus("extraServices",false), "extraServicesNote", "extraServicesYesNote"));
   l.push(svcLine("Receipt before payment", svcStatus("receipt",false), "receiptNote", "receiptYesNote"));
-  l.push(svcLine("Staff eating inside", svcStatus("eatingInside",true), "eatingInsideNote"));
+
+  // Eating inside: flip the label text based on status
+  const eatStatus = svcStatus("eatingInside", true);
+  if (eatStatus === "bad") {
+    let eatLine = `  \u274C Staff eating inside`;
+    if (data.eatingInsideNote) eatLine += ` \u2014 ${data.eatingInsideNote}`;
+    l.push(eatLine);
+  } else {
+    l.push(`  \u2705 Staff not eating inside`);
+  }
+
   l.push(svcLine("Next barber ready", svcStatus("nextBarberReady",false), "nextBarberReadyNote"));
   if(data.staffMissing==="Yes"){l.push("");l.push(`\u26A0\uFE0F *STAFF MISSING*: ${data.missingName||"?"} (${data.missingMins||"?"} mins)`);}
   if(data.goodService||data.poorService){l.push("");if(data.goodService)l.push(`\u2B50 Good service: ${data.goodService}`);if(data.poorService)l.push(`\u26D4 Poor service: ${data.poorService}`);}
